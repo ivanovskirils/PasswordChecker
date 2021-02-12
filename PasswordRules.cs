@@ -106,7 +106,8 @@ namespace PasswordChecker
                 sHash = BitConverter.ToString(hash).Replace("-", ""); // convert bit array to hexadecimal
             }
 
-            string existingPasswords = requestThroughApi(sHash.Substring(0, 5)); //call the function for API request
+            int occassions = 0;
+            string existingPasswords = checkSimilarPasswords(sHash.Substring(0, 5)); //call the function for API request
             if (!string.IsNullOrWhiteSpace(existingPasswords)) // if string returned, we will check our password
             {
                 var passwordAr = existingPasswords.Split("\r\n", StringSplitOptions.None).ToList(); //splitting the string into separate passwords
@@ -118,19 +119,22 @@ namespace PasswordChecker
                     passwordDic.TryAdd(tmpPw[0], int.Parse(tmpPw[1])); //adding to dictionary
                 }
 
-                int occassions = 0;
-                passwordDic.TryGetValue(sHash, out occassions); //try to find quantity of password appearing times
+                passwordDic.TryGetValue(sHash.Substring(5), out occassions); //try to find quantity of password appearing times
                 if (occassions == 0) // if there are not appearing times, the password is good
                 {
                     Console.WriteLine("Password is good!");
                 }
+                else
+                {
+                    Console.WriteLine($"Your password appeared {occassions} times in Database, so it is no good");
+                }
             }
             else
             {
-                Console.WriteLine("Your password appeared in Database, so it is no good");
+                Console.WriteLine("Somethig was wrong, Please, try again");
             }
         }
-        private static string requestThroughApi(string hash)
+        private static string checkSimilarPasswords(string hash)
         {
             string result = string.Empty; //result string
 
